@@ -114,7 +114,23 @@ function viewEmployees(){
 };
 
 function addDepartment(){
-
+  let query = "INSERT INTO departments (departmentName) VALUES (?)";
+  let params = [];
+  inquirer.prompt([
+      {
+          type: "input",
+          name: "deptname",
+          message: "What is the name of the new department?",
+      },
+  ])
+      .then((res) => {
+          params.push(res.deptname);
+          db.query(query, params, (err, res) => {
+              if (err) console.log(err);
+              console.log(`Added ${params} Department.\n`);
+              selectOption();
+          });
+      });
 };
 
 function addRole(){
@@ -122,6 +138,69 @@ function addRole(){
 };
 
 function addEmployee(){
+    let roleArr = [];
+    let roleQuery = "SELECT roles.title FROM roles;";
+    db.query(roleQuery, function (err, res) {
+        if (err) throw err;
+        for (i = 0; i < res.length; i++) {
+            roleArr.push(res[i].title)
+        }
+    })
+        let mgrArr = [];
+        let mgrQuery = "SELECT * FROM employees WHERE departmentManager IS NOT NULL;";
+    db.query(mgrQuery, function (err, res) {
+        if (err) throw err;
+        for (i = 0; i < res.length; i++) {
+            mgrArr.push(res[i].firstName + " " + res[i].lastName)
+        }
+    })
+            inquirer.prompt([
+                {
+                    type: 'input',
+                    message: 'What is your employees first name?',
+                    name: "firstname"
+                },
+                {
+                    type: 'input',
+                    message: 'What is your employees last name?',
+                    name: "lastname"
+                },
+                {
+                    type: "list",
+                    message: "Choose your employee's role",
+                    name: "role",
+                    choices: roleArr
+                },
+                {
+                    type: "list",
+                    message: "Choose your employee's manager",
+                    name: "manager",
+                    choices: mgrArr
+                },
+            ]).then(function (response) {
+                console.log("\nBuilding New Employee...\n");
+                let addEmployeeRole = response.roles;
+                let addManager = response.manager;
+                let addEmployeeRoleId = roleArr.indexOf(addEmployeeRole);
+                let addManagerId = mgrArr.indexOf(addManager);
+                addEmployeeRoleId++;
+                addManagerId++;
+                db.query("INSERT INTO employees SET ?",
+                    {
+                        firstName: response.firstName,
+                        lastName: response.lastName,
+                        roleId: addEmployeeRoleId,
+                        departmentManager: addManagerId
+                    },
+                    function (err, res) {
+                        if (err) throw err;
+                        console.log("Employee Created Succesfully\n");
+                        selectOption();
+                    });
+            });
+};
+
+function updateEmployee(){
 
 };
 
