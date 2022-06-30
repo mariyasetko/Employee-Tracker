@@ -105,7 +105,7 @@ function viewRoles(){
 
 function viewEmployees(){
   db.query(
-    `SELECT employees.id AS ID, employees.firstName AS "FIRST NAME", employees.lastName AS "LAST NAME", roles.title AS ROLE, departments.departmentName AS DEPARTMENT, roles.salary AS SALARY, CONCAT(departmentManager.firstName, ' ', departmentManager.lastName) AS MANAGER FROM employees LEFT JOIN roles on employees.roleId = roles.roleId LEFT JOIN departments on roles.departmentId = departments.departmentId LEFT JOIN employees departmentManager on departmentManager.id = employees.managerId;`
+    `SELECT employees.id AS ID, employees.firstName AS "FIRST NAME", employees.lastName AS "LAST NAME", roles.title AS ROLE, departments.departmentName AS DEPARTMENT, roles.salary AS SALARY, CONCAT(departmentManager.firstName, ' ', departmentManager.lastName) AS MANAGER FROM employees LEFT JOIN roles on employees.roles = roles.roleId LEFT JOIN departments on roles.departmentId = departments.departmentId LEFT JOIN employees departmentManager on departmentManager.id = employees.managerId;`
     , function (err, results) {
         console.table(results);
         selectOption();
@@ -134,7 +134,50 @@ function addDepartment(){
 };
 
 function addRole(){
+  let query =
+  "INSERT INTO role (title, salary, departmentId) VALUES (?, ?, ?)";
 
+db.query("SELECT * FROM departments", (err, res) => {
+  if (err) console.log(err);
+
+  inquirer.prompt([
+      {
+          type: "input",
+          name: "title",
+          message: "What is the name of the new role?",
+      },
+      {
+          type: "input",
+          name: "salary",
+          messsage: "What is the salary of the role?",
+      },
+      {
+          type: "list",
+          name: "departmentId",
+          message: "What is the department of the role?",
+          choices: res.map((departments) => {
+              return {
+                  name: departments.departmentName,
+                  value: departments.departmentId,
+              };
+          }),
+      },
+  ])
+      .then((res) => {
+          db.query(
+              query,
+              [res.title, res.salary, res.departmentId],
+              (err, res) => {
+                  if (err) {
+                      console.log(err);
+                      return;
+                  }
+                  console.log(`Role has been created\n`);
+                  selectOption();
+              }
+          );
+      });
+});
 };
 
 function addEmployee(){
@@ -147,13 +190,13 @@ function addEmployee(){
         }
     })
         let mgrArr = [];
-        let mgrQuery = "SELECT * FROM employees WHERE departmentManager IS NOT NULL;";
-    db.query(mgrQuery, function (err, res) {
+        let mgrQuery = "SELECT * FROM employees WHERE departmentManager NOT NULL;";
+    /*db.query(mgrQuery, function (err, res) {
         if (err) throw err;
         for (i = 0; i < res.length; i++) {
             mgrArr.push(res[i].firstName + " " + res[i].lastName)
-        }
-    })
+          }
+    })*/
             inquirer.prompt([
                 {
                     type: 'input',
@@ -201,7 +244,52 @@ function addEmployee(){
 };
 
 function updateEmployee(){
+  let query = "UPDATE employee SET roleId = ? WHERE id = ?";
+  let empID;
 
+  db.query("SELECT * FROM employees", (err, res) => {
+      if (err) console.log(err);
+      
+      inquirer.prompt([
+          {
+              type: "list",
+              name: "id",
+              message: "Which employee would you like to change to a new role?",
+              choices: res.map((employees) => {
+                  return {
+                      name: employees.firstName + " " + employees.lastName,
+                      value: employees.id,
+                  };
+              }),
+          },
+      ]).then((res) => {
+          empID = res.id;
+          db.query("SELECT * FROM roles", (err, res) => {
+              if (err) console.log(err);
+              
+              inquirer.prompt([
+                  {
+                      type: "list",
+                      name: "roleId",
+                      message: "Which role do you want to assign to the employee?",
+                      choices: res.map((roles) => {
+                          return {
+                              name: roles.title,
+                              value: roles.roleId,
+                          };
+                      }),
+                  },
+              ])
+                  .then((res) => {
+                      db.query(query, [res.roleId, empID], (err, res) => {
+                          if (err) console.log(err);
+                          console.log("Employee role has been updated\n");
+                          selectOption();
+                      });
+                  });
+          });
+      });
+  })
 };
 
 function quit(){
