@@ -105,7 +105,7 @@ function viewRoles(){
 
 function viewEmployees(){
   db.query(
-    `SELECT employees.id AS ID, employees.firstName AS "FIRST NAME", employees.lastName AS "LAST NAME", roles.title AS ROLE, departments.departmentName AS DEPARTMENT, roles.salary AS SALARY, CONCAT(departmentManager.firstName, ' ', departmentManager.lastName) AS MANAGER FROM employees LEFT JOIN roles on employees.roles = roles.roleId LEFT JOIN departments on roles.departmentId = departments.departmentId LEFT JOIN employees departmentManager on departmentManager.id = employees.managerId;`
+    `SELECT employees.id AS ID, employees.firstName AS "FIRST NAME", employees.lastName AS "LAST NAME", roles.title AS ROLE, departments.departmentName AS DEPARTMENT, roles.salary AS SALARY, CONCAT(departmentManager.firstName, ' ', departmentManager.lastName) AS MANAGER FROM employees LEFT JOIN roles on employees.roleId = roles.roleId LEFT JOIN departments on roles.departmentId = departments.departmentId LEFT JOIN employees departmentManager on departmentManager.id = employees.managerId;`
     , function (err, results) {
         console.table(results);
         selectOption();
@@ -135,7 +135,7 @@ function addDepartment(){
 
 function addRole(){
   let query =
-  "INSERT INTO role (title, salary, departmentId) VALUES (?, ?, ?)";
+  "INSERT INTO roles (title, salary, departmentId) VALUES (?, ?, ?)";
 
 db.query("SELECT * FROM departments", (err, res) => {
   if (err) console.log(err);
@@ -153,7 +153,7 @@ db.query("SELECT * FROM departments", (err, res) => {
       },
       {
           type: "list",
-          name: "departmentId",
+          name: "department",
           message: "What is the department of the role?",
           choices: res.map((departments) => {
               return {
@@ -166,7 +166,7 @@ db.query("SELECT * FROM departments", (err, res) => {
       .then((res) => {
           db.query(
               query,
-              [res.title, res.salary, res.departmentId],
+              [res.title, res.salary, res.department],
               (err, res) => {
                   if (err) {
                       console.log(err);
@@ -190,13 +190,13 @@ function addEmployee(){
         }
     })
         let mgrArr = [];
-        let mgrQuery = "SELECT * FROM employees WHERE departmentManager NOT NULL;";
-    /*db.query(mgrQuery, function (err, res) {
+        let mgrQuery = "SELECT * FROM employees WHERE managerId NOT NULL;";
+    db.query(mgrQuery, function (err, res) {
         if (err) throw err;
         for (i = 0; i < res.length; i++) {
             mgrArr.push(res[i].firstName + " " + res[i].lastName)
           }
-    })*/
+    })  
             inquirer.prompt([
                 {
                     type: 'input',
@@ -219,10 +219,10 @@ function addEmployee(){
                     message: "Choose your employee's manager",
                     name: "manager",
                     choices: mgrArr
-                },
+                },   
             ]).then(function (response) {
                 console.log("\nBuilding New Employee...\n");
-                let addEmployeeRole = response.roles;
+                let addEmployeeRole = response.role;
                 let addManager = response.manager;
                 let addEmployeeRoleId = roleArr.indexOf(addEmployeeRole);
                 let addManagerId = mgrArr.indexOf(addManager);

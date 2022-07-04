@@ -1,15 +1,15 @@
-insert into departments
+INSERT INTO departments
     (departmentId, departmentName, departmentManager)
-values
+VALUES
     (1, "Accounting", "Angela Martin"),
     (2, "Human Resources", "Toby Flenderson"),
     (3, "Customer Service", "Kelly Kapoor"),
     (4, "Sales", "Michael Scott"),
     (5, "Warehouse", "Darryl Philbin");
 
-insert into roles
+INSERT INTO roles
     (roleId, title, salary, departmentId)
-values
+VALUES
     (1, "Senior Accountant", 65000, 1),
     (2, "Accountant", 60000, 1),
     (3, "HR Manager", 50000, 2),
@@ -20,9 +20,9 @@ values
     (8, "Warehouse Foreman", 95000, 5),
     (9, "Dock Worker", 45000, 5);
 
-insert into employees
+INSERT INTO employees
     (firstName, lastName, roleId, managerId)
-values
+VALUES
     ("Angela", "Martin", 1,1),
     ("Oscar", "Martinez", 2, 1),
     ("Kevin", "Malone", 2, 1),
