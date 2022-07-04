@@ -7,6 +7,5 @@ This application allows employers to view, add, or update their departments, rol
 Run npm install. 
 Run node index.js, then follow the prompts in the command line. 
 
-# Screenshots
-
-![database]()
+# Walkthrough Video
+https://drive.google.com/file/d/1-CKVPF7TDObqHFstAtR-AKGuHmhkUIGt/view
